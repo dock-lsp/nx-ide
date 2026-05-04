@@ -29,7 +29,7 @@ fun FileExplorer(
 ) {
     Column(
         modifier = modifier
-            .width(240.dp)
+            .width(200.dp)
             .fillMaxHeight()
             .background(NxBgSecondary)
     ) {

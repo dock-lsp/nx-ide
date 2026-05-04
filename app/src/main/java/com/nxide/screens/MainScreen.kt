@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nxide.components.*
 import com.nxide.data.*
@@ -17,6 +19,15 @@ fun MainScreen(
     viewModel: NxIdeViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val configuration = LocalConfiguration.current
+    val isNarrowScreen = configuration.screenWidthDp < 600
+
+    // On narrow screens, default sidebar to closed
+    LaunchedEffect(isNarrowScreen) {
+        if (isNarrowScreen && state.sidebarOpen) {
+            viewModel.toggleSidebar()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -32,8 +43,12 @@ fun MainScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            // Main content
-            Box(modifier = Modifier.weight(1f)) {
+            // Main content - takes all available space
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
                 when {
                     state.showSettings || state.activeTab == MainTab.SETTINGS -> {
                         SettingsScreen(
@@ -45,8 +60,8 @@ fun MainScreen(
                     }
                     state.activeTab == MainTab.PROJECT -> {
                         Row(modifier = Modifier.fillMaxSize()) {
-                            // File explorer
-                            if (state.sidebarOpen) {
+                            // File explorer - collapsible
+                            if (state.sidebarOpen && !isNarrowScreen) {
                                 FileExplorer(
                                     projectName = state.projectName,
                                     files = state.files,
@@ -95,30 +110,34 @@ fun MainScreen(
                 }
             }
 
-            // Bottom panel
-            state.activeBottomPanel?.let { panel ->
-                BottomPanelContainer(
-                    panelType = panel,
-                    logs = state.logs,
-                    buildSteps = state.buildSteps,
-                    isBuilding = state.isBuilding,
-                    buildSummary = state.buildSummary,
-                    terminalLines = state.terminalLines,
-                    onClearLogs = { viewModel.clearLogs() },
-                    onStartBuild = { viewModel.startBuild() },
-                    onStopBuild = { viewModel.stopBuild() },
-                    onResetBuild = { viewModel.resetBuild() },
-                    onClearTerminal = { viewModel.clearTerminal() },
-                    onExecuteCommand = { viewModel.executeTerminalCommand(it) }
-                )
+            // Bottom panel - only show in project tab and when not in settings
+            if (state.activeTab == MainTab.PROJECT && !state.showSettings) {
+                state.activeBottomPanel?.let { panel ->
+                    BottomPanelContainer(
+                        panelType = panel,
+                        logs = state.logs,
+                        buildSteps = state.buildSteps,
+                        isBuilding = state.isBuilding,
+                        buildSummary = state.buildSummary,
+                        terminalLines = state.terminalLines,
+                        onClearLogs = { viewModel.clearLogs() },
+                        onStartBuild = { viewModel.startBuild() },
+                        onStopBuild = { viewModel.stopBuild() },
+                        onResetBuild = { viewModel.resetBuild() },
+                        onClearTerminal = { viewModel.clearTerminal() },
+                        onExecuteCommand = { viewModel.executeTerminalCommand(it) }
+                    )
+                }
             }
 
-            // Bottom toolbar
-            BottomToolbar(
-                activePanel = state.activeBottomPanel,
-                onPanelClick = { viewModel.toggleBottomPanel(it) },
-                onAiClick = { viewModel.toggleAiPanel() }
-            )
+            // Bottom toolbar - always visible except in settings
+            if (!state.showSettings && state.activeTab != MainTab.SETTINGS) {
+                BottomToolbar(
+                    activePanel = state.activeBottomPanel,
+                    onPanelClick = { viewModel.toggleBottomPanel(it) },
+                    onAiClick = { viewModel.toggleAiPanel() }
+                )
+            }
         }
     }
 }

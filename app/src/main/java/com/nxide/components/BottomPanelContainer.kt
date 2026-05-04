@@ -32,30 +32,33 @@ fun BottomPanelContainer(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp)
-            .background(NxBorder.copy(alpha = 0.05f))
+            .height(IntrinsicSize.Min)
+            .heightIn(min = 180.dp, max = 260.dp)
+            .background(NxBgPrimary)
     ) {
-        HorizontalDivider(color = NxBorder)
-        when (panelType) {
-            BottomPanelType.LAYOUT -> LayoutPanel()
-            BottomPanelType.BUILD -> BuildPanel(
-                steps = buildSteps,
-                isBuilding = isBuilding,
-                buildSummary = buildSummary,
-                onStartBuild = onStartBuild,
-                onStopBuild = onStopBuild,
-                onResetBuild = onResetBuild
-            )
-            BottomPanelType.LOGCAT -> LogcatPanel(
-                logs = logs,
-                onClear = onClearLogs
-            )
-            BottomPanelType.FILES -> FilesPanel()
-            BottomPanelType.TERMINAL -> TerminalPanel(
-                lines = terminalLines,
-                onClear = onClearTerminal,
-                onExecute = onExecuteCommand
-            )
+        HorizontalDivider(color = NxBorder, thickness = 2.dp)
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            when (panelType) {
+                BottomPanelType.LAYOUT -> LayoutPanel()
+                BottomPanelType.BUILD -> BuildPanel(
+                    steps = buildSteps,
+                    isBuilding = isBuilding,
+                    buildSummary = buildSummary,
+                    onStartBuild = onStartBuild,
+                    onStopBuild = onStopBuild,
+                    onResetBuild = onResetBuild
+                )
+                BottomPanelType.LOGCAT -> LogcatPanel(
+                    logs = logs,
+                    onClear = onClearLogs
+                )
+                BottomPanelType.FILES -> FilesPanel()
+                BottomPanelType.TERMINAL -> TerminalPanel(
+                    lines = terminalLines,
+                    onClear = onClearTerminal,
+                    onExecute = onExecuteCommand
+                )
+            }
         }
     }
 }

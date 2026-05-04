@@ -21,7 +21,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nxide.ai.AiConfig
-import com.nxide.ai.ApiPreset
 import com.nxide.ui.theme.*
 
 @Composable
@@ -45,13 +44,14 @@ fun SettingsScreen(
             .fillMaxSize()
             .background(NxBgPrimary)
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Title
         Text(
             "⚙️ 设置",
-            fontSize = 24.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = NxTextPrimary
         )
@@ -60,56 +60,62 @@ fun SettingsScreen(
         SectionCard {
             Text(
                 "🤖 AI 模型配置",
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = NxGreen
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(2.dp))
             Text(
-                "配置 OpenAI 兼容的 API 接口，支持 OpenAI、DeepSeek、通义千问等",
-                fontSize = 12.sp,
+                "支持 OpenAI / DeepSeek / 通义千问 等兼容接口",
+                fontSize = 11.sp,
                 color = NxTextMuted
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Quick presets
-            Text("快速选择", fontSize = 12.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
-            Spacer(Modifier.height(8.dp))
+            Text("快速选择", fontSize = 11.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(6.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                AiConfig.PRESETS.take(5).forEachIndexed { index, preset ->
-                    val isSelected = selectedPreset == index
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (isSelected) NxGreen.copy(alpha = 0.15f)
-                                else NxBgInput
-                            )
-                            .clickable {
+            // Preset grid - 2 rows
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    AiConfig.PRESETS.take(3).forEachIndexed { index, preset ->
+                        PresetChip(
+                            preset = preset.name,
+                            isSelected = selectedPreset == index,
+                            onClick = {
                                 selectedPreset = index
                                 endpoint = preset.endpoint
-                                if (preset.defaultModel.isNotEmpty()) {
-                                    model = preset.defaultModel
-                                }
-                            }
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            preset.name,
-                            fontSize = 12.sp,
-                            color = if (isSelected) NxGreen else NxTextSecondary,
-                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                if (preset.defaultModel.isNotEmpty()) model = preset.defaultModel
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    AiConfig.PRESETS.drop(3).forEachIndexed { index, preset ->
+                        PresetChip(
+                            preset = preset.name,
+                            isSelected = selectedPreset == index + 3,
+                            onClick = {
+                                selectedPreset = index + 3
+                                endpoint = preset.endpoint
+                                if (preset.defaultModel.isNotEmpty()) model = preset.defaultModel
+                            },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             // API Endpoint
             LabeledInput(
@@ -123,12 +129,12 @@ fun SettingsScreen(
             )
 
             // API Key
-            Spacer(Modifier.height(12.dp))
-            Text("API Key", fontSize = 12.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(10.dp))
+            Text("API Key", fontSize = 11.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(4.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 BasicTextField(
                     value = apiKey,
@@ -149,7 +155,7 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(NxBgInput)
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                                .padding(horizontal = 10.dp, vertical = 8.dp)
                         ) {
                             if (apiKey.isEmpty()) {
                                 Text("sk-...", fontSize = 13.sp, color = NxTextMuted)
@@ -163,7 +169,7 @@ fun SettingsScreen(
                         .clip(RoundedCornerShape(8.dp))
                         .background(NxBgInput)
                         .clickable { showKey = !showKey }
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
                 ) {
                     Text(
                         if (showKey) "🙈" else "👁️",
@@ -173,7 +179,7 @@ fun SettingsScreen(
             }
 
             // Model
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
             LabeledInput(
                 label = "模型",
                 value = model,
@@ -182,17 +188,17 @@ fun SettingsScreen(
             )
 
             // Advanced
-            Spacer(Modifier.height(16.dp))
-            Text("高级设置", fontSize = 12.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
+            Text("高级设置", fontSize = 11.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(6.dp))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Max Tokens", fontSize = 11.sp, color = NxTextMuted)
-                    Spacer(Modifier.height(4.dp))
+                    Text("Max Tokens", fontSize = 10.sp, color = NxTextMuted)
+                    Spacer(Modifier.height(3.dp))
                     BasicTextField(
                         value = maxTokens,
                         onValueChange = { maxTokens = it.filter { c -> c.isDigit() } },
@@ -205,14 +211,14 @@ fun SettingsScreen(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(NxBgInput)
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .padding(horizontal = 10.dp, vertical = 7.dp)
                             ) { inner() }
                         }
                     )
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Temperature", fontSize = 11.sp, color = NxTextMuted)
-                    Spacer(Modifier.height(4.dp))
+                    Text("Temperature", fontSize = 10.sp, color = NxTextMuted)
+                    Spacer(Modifier.height(3.dp))
                     BasicTextField(
                         value = temperature,
                         onValueChange = { temperature = it.filter { c -> c.isDigit() || c == '.' } },
@@ -225,7 +231,7 @@ fun SettingsScreen(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(NxBgInput)
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .padding(horizontal = 10.dp, vertical = 7.dp)
                             ) { inner() }
                         }
                     )
@@ -233,9 +239,9 @@ fun SettingsScreen(
             }
 
             // Buttons
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(14.dp))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Box(
@@ -255,12 +261,12 @@ fun SettingsScreen(
                             )
                             showSaved = true
                         }
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "💾 保存配置",
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = NxBgPrimary
                     )
@@ -271,12 +277,12 @@ fun SettingsScreen(
                         .clip(RoundedCornerShape(10.dp))
                         .background(NxBgInput)
                         .clickable { onTest?.invoke() }
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "🧪 测试连接",
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         color = NxTextSecondary
                     )
                 }
@@ -288,16 +294,12 @@ fun SettingsScreen(
                     kotlinx.coroutines.delay(2000)
                     showSaved = false
                 }
-                Text(
-                    "✅ 配置已保存",
-                    fontSize = 12.sp,
-                    color = NxGreen
-                )
+                Text("✅ 配置已保存", fontSize = 12.sp, color = NxGreen)
             }
 
             // Test result
             testResult?.let {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -306,7 +308,7 @@ fun SettingsScreen(
                             if (it.startsWith("✅")) NxGreen.copy(alpha = 0.1f)
                             else NxRed.copy(alpha = 0.1f)
                         )
-                        .padding(12.dp)
+                        .padding(10.dp)
                 ) {
                     Text(it, fontSize = 12.sp, color = if (it.startsWith("✅")) NxGreen else NxRed)
                 }
@@ -317,15 +319,30 @@ fun SettingsScreen(
         SectionCard {
             Text(
                 "💡 使用说明",
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = NxBlue
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
             InfoItem("支持所有 OpenAI 兼容的 API 接口")
             InfoItem("API Key 仅存储在本地设备，不会上传")
             InfoItem("流式输出可实时查看 AI 响应")
             InfoItem("对话会自动携带当前文件作为上下文")
+        }
+
+        // ===== Build Config Section =====
+        SectionCard {
+            Text(
+                "🔨 构建配置",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = NxOrange
+            )
+            Spacer(Modifier.height(6.dp))
+            InfoItem("自动检测项目中的 gradlew 脚本")
+            InfoItem("支持 assembleDebug / assembleRelease")
+            InfoItem("可通过环境变量 NX_PROJECT_PATH 指定项目路径")
+            InfoItem("终端支持所有 shell 命令")
         }
     }
 }
@@ -337,9 +354,36 @@ private fun SectionCard(content: @Composable ColumnScope.() -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(NxBgSecondary)
-            .padding(16.dp),
+            .padding(14.dp),
         content = content
     )
+}
+
+@Composable
+private fun PresetChip(
+    preset: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                if (isSelected) NxGreen.copy(alpha = 0.15f)
+                else NxBgInput
+            )
+            .clickable { onClick() }
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            preset,
+            fontSize = 12.sp,
+            color = if (isSelected) NxGreen else NxTextSecondary,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+        )
+    }
 }
 
 @Composable
@@ -350,8 +394,8 @@ private fun LabeledInput(
     placeholder: String
 ) {
     Column {
-        Text(label, fontSize = 12.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
-        Spacer(Modifier.height(6.dp))
+        Text(label, fontSize = 11.sp, color = NxTextSecondary, fontWeight = FontWeight.Medium)
+        Spacer(Modifier.height(4.dp))
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
@@ -369,7 +413,7 @@ private fun LabeledInput(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .background(NxBgInput)
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
                 ) {
                     if (value.isEmpty()) {
                         Text(placeholder, fontSize = 13.sp, color = NxTextMuted)
@@ -384,10 +428,10 @@ private fun LabeledInput(
 @Composable
 private fun InfoItem(text: String) {
     Row(
-        modifier = Modifier.padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.padding(vertical = 1.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text("•", fontSize = 12.sp, color = NxGreen)
-        Text(text, fontSize = 12.sp, color = NxTextSecondary)
+        Text("•", fontSize = 11.sp, color = NxGreen)
+        Text(text, fontSize = 11.sp, color = NxTextSecondary)
     }
 }

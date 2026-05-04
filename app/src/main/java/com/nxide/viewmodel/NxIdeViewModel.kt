@@ -41,7 +41,7 @@ data class NxIdeState(
     val isBuilding: Boolean = false,
     val buildSummary: String = "点击 ▶ 运行 开始构建",
     val terminalLines: List<TerminalLine> = listOf(TerminalLine("$ ", isCommand = true)),
-    val sidebarOpen: Boolean = true,
+    val sidebarOpen: Boolean = false,
     val aiPrompt: String = "",
     val aiMessages: List<AiMessage> = emptyList(),
     val showAiPanel: Boolean = false,

@@ -43,7 +43,7 @@ fun CodeEditor(
                 modifier = Modifier
                     .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
                     .background(NxBgPrimary)
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -52,12 +52,17 @@ fun CodeEditor(
                         activeFile.endsWith(".xml") -> "🔵"
                         else -> "🟢"
                     },
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
-                Spacer(Modifier.width(6.dp))
-                Text(activeFile, fontSize = 12.sp, color = NxTextPrimary)
-                Spacer(Modifier.width(8.dp))
-                Text("×", fontSize = 16.sp, color = NxTextMuted)
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    activeFile,
+                    fontSize = 11.sp,
+                    color = NxTextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.widthIn(max = 150.dp)
+                )
             }
         }
 
@@ -74,16 +79,16 @@ fun CodeEditor(
             Column(
                 modifier = Modifier
                     .background(NxBgSecondary)
-                    .padding(top = 12.dp, bottom = 12.dp)
+                    .padding(top = 8.dp, bottom = 8.dp)
             ) {
                 lines.forEachIndexed { index, _ ->
                     Text(
                         "${index + 1}",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         color = NxTextMuted,
                         fontFamily = FontFamily.Monospace,
-                        lineHeight = 22.sp,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 0.dp)
+                        lineHeight = 18.sp,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 0.dp)
                     )
                 }
             }
@@ -94,15 +99,15 @@ fun CodeEditor(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(12.dp)
+                    .padding(8.dp)
             ) {
                 Text(
                     text = buildAnnotatedString {
                         appendHighlightedCode(code, language)
                     },
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
-                    lineHeight = 22.sp,
+                    lineHeight = 18.sp,
                     color = NxTextPrimary
                 )
             }
@@ -112,17 +117,17 @@ fun CodeEditor(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(24.dp)
+                .height(22.dp)
                 .background(NxBgTertiary)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Ln ${lines.size}, Col 1", fontSize = 11.sp, color = NxTextMuted)
-            Text(language.displayName, fontSize = 11.sp, color = NxTextMuted)
-            Text("UTF-8", fontSize = 11.sp, color = NxTextMuted)
+            Text("Ln ${lines.size}", fontSize = 10.sp, color = NxTextMuted)
+            Text(language.displayName, fontSize = 10.sp, color = NxTextMuted)
+            Text("UTF-8", fontSize = 10.sp, color = NxTextMuted)
             Spacer(Modifier.weight(1f))
-            Text("🤖 AI 辅助", fontSize = 11.sp, color = NxGreen)
+            Text("🤖 AI", fontSize = 10.sp, color = NxGreen)
         }
     }
 }
