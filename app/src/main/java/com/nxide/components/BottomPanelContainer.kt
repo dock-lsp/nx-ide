@@ -10,6 +10,7 @@ import com.nxide.data.BottomPanelType
 import com.nxide.data.BuildStep
 import com.nxide.data.LogEntry
 import com.nxide.data.TerminalLine
+import com.nxide.ui.theme.NxBgPrimary
 import com.nxide.ui.theme.NxBorder
 import com.nxide.components.panels.*
 
