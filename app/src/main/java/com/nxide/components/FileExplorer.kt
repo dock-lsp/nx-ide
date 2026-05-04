@@ -455,12 +455,6 @@ private fun FileTreeItem(
                 if (node.type == FileType.FOLDER) onFolderClick(node.name)
                 else onFileClick(node.name)
             }
-            .clickable(
-                enabled = true,
-                onClick = { },
-                indication = null,
-                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-            )
             .background(if (isActive) NxGreen.copy(alpha = 0.1f) else androidx.compose.ui.graphics.Color.Transparent)
             .padding(start = (12 + depth * 16).dp, end = 12.dp, top = 5.dp, bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically
