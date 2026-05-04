@@ -5,10 +5,20 @@
 ## 功能特性
 
 ### 📝 代码编辑器
-- Kotlin / XML / Gradle 语法高亮
+- Kotlin / XML / Gradle / Properties 语法高亮
+- 行号显示（可配置）
+- 多标签页支持，带修改指示器
+- 自动换行（可配置）
+- 括号高亮
+- 查找与替换（支持大小写、正则表达式）
+- 全局搜索（跨文件搜索）
+
+### 📁 文件管理
 - 文件树浏览器
-- 行号显示
-- 多标签页支持
+- 新建文件 / 文件夹
+- 重命名 / 删除文件
+- 右键上下文菜单
+- 文件类型图标区分
 
 ### 📋 项目模板
 - 20+ 安卓项目模板
@@ -18,16 +28,22 @@
 ### 🔨 构建系统
 - 可视化构建流程
 - 实时构建状态
-- 构建步骤详情
+- 构建步骤详情与耗时
 
 ### 📋 Logcat
 - 实时日志查看
 - 日志级别过滤（Info/Warn/Error/Debug）
+- 日志计数
 
 ### 💻 终端
 - 内置终端模拟器
-- 命令响应模拟
-- 常用命令支持
+- 丰富的命令支持：
+  - 文件系统：`ls`, `cd`, `pwd`, `mkdir`, `touch`, `cat`, `head`, `tail`, `wc`, `find`, `grep`
+  - 构建工具：`gradle`, `./gradlew`
+  - Android：`adb` (devices, install, shell)
+  - 版本控制：`git` (status, log, branch, diff, commit, push, pull)
+  - 系统工具：`echo`, `date`, `whoami`, `hostname`, `uname`, `history`
+- 命令历史记录
 
 ### 📐 Layout Inspector
 - UI 层级树
@@ -38,6 +54,14 @@
 - 代码生成
 - 架构优化建议
 - 对话式交互
+- 快捷建议面板
+
+### ⚙️ 设置
+- 字体大小调节
+- Tab 宽度配置
+- 行号显示开关
+- 自动换行开关
+- 自动缩进开关
 
 ## 技术栈
 
@@ -95,15 +119,15 @@ app/src/main/java/com/nxide/
 ./gradlew test
 ```
 
-## 截图
+## 键盘快捷键
 
-| 代码编辑器 | 项目模板 |
-|-----------|---------|
-| ![代码编辑器](screenshots/code.png) | ![模板](screenshots/templates.png) |
-
-| AI 助手 | 构建系统 |
-|---------|---------|
-| ![AI](screenshots/ai.png) | ![构建](screenshots/build.png) |
+| 快捷键 | 功能 |
+|--------|------|
+| Ctrl+F | 查找 |
+| Ctrl+H | 查找并替换 |
+| Ctrl+Shift+F | 全局搜索 |
+| Ctrl+N | 新建文件 |
+| Ctrl+W | 关闭当前标签页 |
 
 ## 许可证
 

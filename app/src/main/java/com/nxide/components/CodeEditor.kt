@@ -15,7 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nxide.data.AppSettings
 import com.nxide.data.CodeLanguage
+import com.nxide.data.SearchState
 import com.nxide.ui.theme.*
 
 @Composable
@@ -24,90 +26,50 @@ fun CodeEditor(
     code: String,
     language: CodeLanguage,
     onCodeChange: (String) -> Unit,
+    settings: AppSettings = AppSettings(),
+    searchState: SearchState = SearchState(),
     modifier: Modifier = Modifier
 ) {
     val lines = code.split("\n")
 
     Column(modifier = modifier.fillMaxSize().background(NxBgPrimary)) {
-        // Tab bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(36.dp)
-                .background(NxBgSecondary)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Active tab
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
-                    .background(NxBgPrimary)
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    when {
-                        activeFile.endsWith(".kt") -> "🟣"
-                        activeFile.endsWith(".xml") -> "🔵"
-                        else -> "🟢"
-                    },
-                    fontSize = 12.sp
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    activeFile,
-                    fontSize = 11.sp,
-                    color = NxTextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.widthIn(max = 150.dp)
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .background(NxGreen)
-        )
-
         // Editor body
         Row(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             // Line numbers
-            Column(
-                modifier = Modifier
-                    .background(NxBgSecondary)
-                    .padding(top = 8.dp, bottom = 8.dp)
-            ) {
-                lines.forEachIndexed { index, _ ->
-                    Text(
-                        "${index + 1}",
-                        fontSize = 11.sp,
-                        color = NxTextMuted,
-                        fontFamily = FontFamily.Monospace,
-                        lineHeight = 18.sp,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 0.dp)
-                    )
+            if (settings.showLineNumbers) {
+                Column(
+                    modifier = Modifier
+                        .background(NxBgSecondary)
+                        .padding(top = 12.dp, bottom = 12.dp)
+                ) {
+                    lines.forEachIndexed { index, _ ->
+                        Text(
+                            "${index + 1}",
+                            fontSize = settings.fontSize.sp,
+                            color = NxTextMuted,
+                            fontFamily = FontFamily.Monospace,
+                            lineHeight = (settings.fontSize * 1.7).sp,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 0.dp)
+                        )
+                    }
                 }
-            }
 
-            VerticalDivider(color = NxBorder)
+                VerticalDivider(color = NxBorder)
+            }
 
             // Code content
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(8.dp)
+                    .padding(12.dp)
             ) {
                 Text(
                     text = buildAnnotatedString {
-                        appendHighlightedCode(code, language)
+                        appendHighlightedCode(code, language, searchState, settings)
                     },
-                    fontSize = 12.sp,
+                    fontSize = settings.fontSize.sp,
                     fontFamily = FontFamily.Monospace,
-                    lineHeight = 18.sp,
+                    lineHeight = (settings.fontSize * 1.7).sp,
                     color = NxTextPrimary
                 )
             }
@@ -117,45 +79,72 @@ fun CodeEditor(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(22.dp)
+                .height(24.dp)
                 .background(NxBgTertiary)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Ln ${lines.size}", fontSize = 10.sp, color = NxTextMuted)
-            Text(language.displayName, fontSize = 10.sp, color = NxTextMuted)
-            Text("UTF-8", fontSize = 10.sp, color = NxTextMuted)
+            Text("Ln ${lines.size}", fontSize = 11.sp, color = NxTextMuted)
+            Text(language.displayName, fontSize = 11.sp, color = NxTextMuted)
+            Text("UTF-8", fontSize = 11.sp, color = NxTextMuted)
+            Text("Tab: ${settings.tabSize}", fontSize = 11.sp, color = NxTextMuted)
             Spacer(Modifier.weight(1f))
-            Text("🤖 AI", fontSize = 10.sp, color = NxGreen)
+            Text("🤖 AI 辅助", fontSize = 11.sp, color = NxGreen)
         }
     }
 }
 
-private fun AnnotatedString.Builder.appendHighlightedCode(code: String, language: CodeLanguage) {
+private fun AnnotatedString.Builder.appendHighlightedCode(
+    code: String,
+    language: CodeLanguage,
+    searchState: SearchState,
+    settings: AppSettings
+) {
     val lines = code.split("\n")
     lines.forEachIndexed { lineIndex, line ->
         when (language) {
-            CodeLanguage.KOTLIN -> appendKotlinLine(line)
-            CodeLanguage.XML -> appendXmlLine(line)
-            CodeLanguage.GRADLE -> appendGradleLine(line)
-            else -> append(line)
+            CodeLanguage.KOTLIN -> appendKotlinLine(line, searchState, settings)
+            CodeLanguage.XML -> appendXmlLine(line, searchState)
+            CodeLanguage.GRADLE -> appendGradleLine(line, searchState)
+            else -> appendWithSearchHighlight(line, searchState)
         }
         if (lineIndex < lines.size - 1) append("\n")
     }
 }
 
-private fun AnnotatedString.Builder.appendKotlinLine(line: String) {
+private fun AnnotatedString.Builder.appendWithSearchHighlight(line: String, searchState: SearchState) {
+    if (searchState.query.isEmpty() || !searchState.isVisible) {
+        append(line)
+        return
+    }
+    var start = 0
+    val query = searchState.query
+    while (start < line.length) {
+        val idx = line.indexOf(query, start, ignoreCase = !searchState.isCaseSensitive)
+        if (idx == -1) {
+            append(line.substring(start))
+            break
+        }
+        if (idx > start) append(line.substring(start, idx))
+        pushStyle(SpanStyle(background = NxYellow.copy(alpha = 0.3f), color = NxTextPrimary))
+        append(line.substring(idx, idx + query.length))
+        pop()
+        start = idx + query.length
+    }
+}
+
+private fun AnnotatedString.Builder.appendKotlinLine(line: String, searchState: SearchState, settings: AppSettings) {
     val trimmed = line.trimStart()
     when {
         trimmed.startsWith("//") -> {
             pushStyle(SpanStyle(color = SynComment, fontStyle = FontStyle.Italic))
-            append(line)
+            appendWithSearchHighlight(line, searchState)
             pop()
         }
         trimmed.startsWith("/*") || trimmed.startsWith("*") -> {
             pushStyle(SpanStyle(color = SynComment, fontStyle = FontStyle.Italic))
-            append(line)
+            appendWithSearchHighlight(line, searchState)
             pop()
         }
         else -> {
@@ -167,19 +156,31 @@ private fun AnnotatedString.Builder.appendKotlinLine(line: String) {
                         val end = line.indexOf('"', i + 1)
                         if (end != -1) {
                             pushStyle(SpanStyle(color = SynString))
-                            append(line.substring(i, end + 1))
+                            appendWithSearchHighlight(line.substring(i, end + 1), searchState)
                             pop()
                             i = end + 1
                         } else {
                             pushStyle(SpanStyle(color = SynString))
-                            append(line.substring(i))
+                            appendWithSearchHighlight(line.substring(i), searchState)
                             pop()
                             break
                         }
                     }
+                    ch == '\'' -> {
+                        val end = line.indexOf('\'', i + 1)
+                        if (end != -1) {
+                            pushStyle(SpanStyle(color = SynString))
+                            appendWithSearchHighlight(line.substring(i, end + 1), searchState)
+                            pop()
+                            i = end + 1
+                        } else {
+                            append(ch)
+                            i++
+                        }
+                    }
                     ch == '/' && i + 1 < line.length && line[i + 1] == '/' -> {
                         pushStyle(SpanStyle(color = SynComment, fontStyle = FontStyle.Italic))
-                        append(line.substring(i))
+                        appendWithSearchHighlight(line.substring(i), searchState)
                         pop()
                         break
                     }
@@ -187,7 +188,7 @@ private fun AnnotatedString.Builder.appendKotlinLine(line: String) {
                         val end = line.indexOfAny(charArrayOf(' ', '(', '\n'), i)
                         val annotation = if (end != -1) line.substring(i, end) else line.substring(i)
                         pushStyle(SpanStyle(color = SynAnnotation))
-                        append(annotation)
+                        appendWithSearchHighlight(annotation, searchState)
                         pop()
                         i += annotation.length
                     }
@@ -195,7 +196,7 @@ private fun AnnotatedString.Builder.appendKotlinLine(line: String) {
                         var j = i
                         while (j < line.length && (line[j].isDigit() || line[j] == '.' || line[j] == 'f' || line[j] == 'L')) j++
                         pushStyle(SpanStyle(color = SynNumber))
-                        append(line.substring(i, j))
+                        appendWithSearchHighlight(line.substring(i, j), searchState)
                         pop()
                         i = j
                     }
@@ -210,9 +211,15 @@ private fun AnnotatedString.Builder.appendKotlinLine(line: String) {
                             else -> NxTextPrimary
                         }
                         pushStyle(SpanStyle(color = color, fontWeight = if (color == SynKeyword) FontWeight.Medium else FontWeight.Normal))
-                        append(word)
+                        appendWithSearchHighlight(word, searchState)
                         pop()
                         i = j
+                    }
+                    ch in "[]{}()\\\\" -> {
+                        pushStyle(SpanStyle(color = NxOrange))
+                        append(ch.toString())
+                        pop()
+                        i++
                     }
                     else -> {
                         append(ch)
@@ -224,14 +231,14 @@ private fun AnnotatedString.Builder.appendKotlinLine(line: String) {
     }
 }
 
-private fun AnnotatedString.Builder.appendXmlLine(line: String) {
+private fun AnnotatedString.Builder.appendXmlLine(line: String, searchState: SearchState) {
     var i = 0
     while (i < line.length) {
         val ch = line[i]
         when {
             ch == '<' && line.startsWith("!--", i + 1) -> {
                 pushStyle(SpanStyle(color = SynComment, fontStyle = FontStyle.Italic))
-                append(line.substring(i))
+                appendWithSearchHighlight(line.substring(i), searchState)
                 pop()
                 break
             }
@@ -242,7 +249,7 @@ private fun AnnotatedString.Builder.appendXmlLine(line: String) {
                 val tagEnd = line.indexOfAny(charArrayOf(' ', '>', '/', '\n'), i)
                 if (tagEnd != -1) {
                     pushStyle(SpanStyle(color = SynTag))
-                    append(line.substring(i, tagEnd))
+                    appendWithSearchHighlight(line.substring(i, tagEnd), searchState)
                     pop()
                     i = tagEnd
                 }
@@ -251,12 +258,12 @@ private fun AnnotatedString.Builder.appendXmlLine(line: String) {
                 val end = line.indexOf('"', i + 1)
                 if (end != -1) {
                     pushStyle(SpanStyle(color = SynString))
-                    append(line.substring(i, end + 1))
+                    appendWithSearchHighlight(line.substring(i, end + 1), searchState)
                     pop()
                     i = end + 1
                 } else {
                     pushStyle(SpanStyle(color = SynString))
-                    append(line.substring(i))
+                    appendWithSearchHighlight(line.substring(i), searchState)
                     pop()
                     break
                 }
@@ -267,10 +274,10 @@ private fun AnnotatedString.Builder.appendXmlLine(line: String) {
                 val word = line.substring(i, j)
                 if (j < line.length && line[j] == '=') {
                     pushStyle(SpanStyle(color = SynAttr))
-                    append(word)
+                    appendWithSearchHighlight(word, searchState)
                     pop()
                 } else {
-                    append(word)
+                    appendWithSearchHighlight(word, searchState)
                 }
                 i = j
             }
@@ -279,11 +286,11 @@ private fun AnnotatedString.Builder.appendXmlLine(line: String) {
     }
 }
 
-private fun AnnotatedString.Builder.appendGradleLine(line: String) {
+private fun AnnotatedString.Builder.appendGradleLine(line: String, searchState: SearchState) {
     val trimmed = line.trimStart()
     if (trimmed.startsWith("//")) {
         pushStyle(SpanStyle(color = SynComment, fontStyle = FontStyle.Italic))
-        append(line)
+        appendWithSearchHighlight(line, searchState)
         pop()
     } else {
         var i = 0
@@ -294,19 +301,19 @@ private fun AnnotatedString.Builder.appendGradleLine(line: String) {
                     val end = line.indexOf('"', i + 1)
                     if (end != -1) {
                         pushStyle(SpanStyle(color = SynString))
-                        append(line.substring(i, end + 1))
+                        appendWithSearchHighlight(line.substring(i, end + 1), searchState)
                         pop()
                         i = end + 1
                     } else {
                         pushStyle(SpanStyle(color = SynString))
-                        append(line.substring(i))
+                        appendWithSearchHighlight(line.substring(i), searchState)
                         pop()
                         break
                     }
                 }
                 ch == '/' && i + 1 < line.length && line[i + 1] == '/' -> {
                     pushStyle(SpanStyle(color = SynComment, fontStyle = FontStyle.Italic))
-                    append(line.substring(i))
+                    appendWithSearchHighlight(line.substring(i), searchState)
                     pop()
                     break
                 }
@@ -314,7 +321,7 @@ private fun AnnotatedString.Builder.appendGradleLine(line: String) {
                     var j = i
                     while (j < line.length && line[j].isDigit()) j++
                     pushStyle(SpanStyle(color = SynNumber))
-                    append(line.substring(i, j))
+                    appendWithSearchHighlight(line.substring(i, j), searchState)
                     pop()
                     i = j
                 }
@@ -324,7 +331,7 @@ private fun AnnotatedString.Builder.appendGradleLine(line: String) {
                     val word = line.substring(i, j)
                     val color = if (GRADLE_KEYWORDS.contains(word)) SynKeyword else NxTextPrimary
                     pushStyle(SpanStyle(color = color))
-                    append(word)
+                    appendWithSearchHighlight(word, searchState)
                     pop()
                     i = j
                 }

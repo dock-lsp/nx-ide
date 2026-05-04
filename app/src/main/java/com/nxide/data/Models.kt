@@ -115,3 +115,60 @@ data class TerminalLine(
     val text: String,
     val isCommand: Boolean = false
 )
+
+/**
+ * 编辑器标签页
+ */
+data class EditorTab(
+    val fileName: String,
+    val language: CodeLanguage,
+    val isModified: Boolean = false
+)
+
+/**
+ * 查找替换状态
+ */
+data class SearchState(
+    val query: String = "",
+    val replaceText: String = "",
+    val isCaseSensitive: Boolean = false,
+    val useRegex: Boolean = false,
+    val matchCount: Int = 0,
+    val currentMatch: Int = 0,
+    val isVisible: Boolean = false
+)
+
+/**
+ * 终端命令定义
+ */
+data class TerminalCommand(
+    val name: String,
+    val description: String,
+    val handler: (List<String>) -> List<String>
+)
+
+/**
+ * 设置项
+ */
+data class AppSettings(
+    val fontSize: Int = 13,
+    val tabSize: Int = 4,
+    val showLineNumbers: Boolean = true,
+    val wordWrap: Boolean = false,
+    val autoIndent: Boolean = true,
+    val bracketMatching: Boolean = true,
+    val theme: String = "dark",
+    val aiModel: String = "default",
+    val aiApiKey: String = ""
+)
+
+/**
+ * 全局搜索结果
+ */
+data class SearchResult(
+    val fileName: String,
+    val lineNumber: Int,
+    val lineContent: String,
+    val matchStart: Int,
+    val matchEnd: Int
+)
