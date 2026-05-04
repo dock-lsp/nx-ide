@@ -19,9 +19,11 @@ fun BottomPanelContainer(
     logs: List<LogEntry>,
     buildSteps: List<BuildStep>,
     isBuilding: Boolean,
+    buildSummary: String = "点击 ▶ 运行 开始构建",
     terminalLines: List<TerminalLine>,
     onClearLogs: () -> Unit,
     onStartBuild: () -> Unit,
+    onStopBuild: () -> Unit = {},
     onResetBuild: () -> Unit,
     onClearTerminal: () -> Unit,
     onExecuteCommand: (String) -> Unit,
@@ -39,7 +41,9 @@ fun BottomPanelContainer(
             BottomPanelType.BUILD -> BuildPanel(
                 steps = buildSteps,
                 isBuilding = isBuilding,
+                buildSummary = buildSummary,
                 onStartBuild = onStartBuild,
+                onStopBuild = onStopBuild,
                 onResetBuild = onResetBuild
             )
             BottomPanelType.LOGCAT -> LogcatPanel(

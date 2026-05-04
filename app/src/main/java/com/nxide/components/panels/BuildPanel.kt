@@ -23,7 +23,9 @@ import com.nxide.ui.theme.*
 fun BuildPanel(
     steps: List<BuildStep>,
     isBuilding: Boolean,
+    buildSummary: String = "点击 ▶ 运行 开始构建",
     onStartBuild: () -> Unit,
+    onStopBuild: () -> Unit = {},
     onResetBuild: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -39,11 +41,11 @@ fun BuildPanel(
         ) {
             Text("🔨 Build Output", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = NxTextSecondary)
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                SmallButton(
-                    text = if (isBuilding) "⏳ 构建中..." else "▶ 运行",
-                    onClick = onStartBuild,
-                    enabled = !isBuilding
-                )
+                if (isBuilding) {
+                    SmallButton("⏹ 停止", onStopBuild)
+                } else {
+                    SmallButton("▶ 运行", onStartBuild)
+                }
                 SmallButton("🗑️ 清除", onResetBuild)
             }
         }
@@ -96,18 +98,13 @@ fun BuildPanel(
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Text(
-                when {
-                    isBuilding -> "⏳ 正在构建..."
-                    steps.all { it.status == BuildStatus.SUCCESS } -> "✅ BUILD SUCCESSFUL - Total: 5.2s"
-                    steps.any { it.status == BuildStatus.ERROR } -> "❌ BUILD FAILED"
-                    else -> "点击 ▶ 运行 开始构建"
-                },
+                buildSummary,
                 fontSize = 12.sp,
                 fontFamily = FontFamily.Monospace,
                 color = when {
                     isBuilding -> NxBlue
-                    steps.all { it.status == BuildStatus.SUCCESS } -> NxGreen
-                    steps.any { it.status == BuildStatus.ERROR } -> NxRed
+                    buildSummary.contains("SUCCESS") -> NxGreen
+                    buildSummary.contains("FAILED") || buildSummary.contains("错误") -> NxRed
                     else -> NxTextMuted
                 }
             )

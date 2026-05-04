@@ -78,6 +78,12 @@ dependencies {
     // Window size class
     implementation("androidx.compose.material3:material3-window-size-class")
 
+    // DataStore (API key persistence)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // OkHttp (AI API streaming)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -22,7 +22,10 @@ fun MainScreen(
         topBar = {
             NxTopBar(
                 activeTab = state.activeTab,
-                onTabClick = { viewModel.setTab(it) },
+                onTabClick = { tab ->
+                    if (tab == MainTab.SETTINGS) viewModel.toggleSettings()
+                    else viewModel.setTab(tab)
+                },
                 onSwitchClick = { viewModel.toggleSidebar() },
                 onMoreClick = { }
             )
@@ -31,8 +34,16 @@ fun MainScreen(
         Column(modifier = Modifier.padding(padding)) {
             // Main content
             Box(modifier = Modifier.weight(1f)) {
-                when (state.activeTab) {
-                    MainTab.PROJECT -> {
+                when {
+                    state.showSettings || state.activeTab == MainTab.SETTINGS -> {
+                        SettingsScreen(
+                            config = state.aiConfig,
+                            onSave = { viewModel.saveAiConfig(it) },
+                            onTest = { viewModel.testAiConnection() },
+                            testResult = state.testResult
+                        )
+                    }
+                    state.activeTab == MainTab.PROJECT -> {
                         Row(modifier = Modifier.fillMaxSize()) {
                             // File explorer
                             if (state.sidebarOpen) {
@@ -63,15 +74,17 @@ fun MainScreen(
                                         messages = state.aiMessages,
                                         prompt = state.aiPrompt,
                                         isThinking = state.isAiThinking,
+                                        streamingContent = state.aiStreamingContent,
                                         onPromptChange = { viewModel.setAiPrompt(it) },
                                         onSend = { viewModel.sendAiMessage() },
+                                        onStop = { viewModel.stopAiStream() },
                                         onClose = { viewModel.toggleAiPanel() }
                                     )
                                 }
                             }
                         }
                     }
-                    MainTab.RECENT -> {
+                    state.activeTab == MainTab.RECENT -> {
                         TemplateScreen(
                             templates = state.templates,
                             selectedCategory = state.templateCategory,
@@ -89,9 +102,11 @@ fun MainScreen(
                     logs = state.logs,
                     buildSteps = state.buildSteps,
                     isBuilding = state.isBuilding,
+                    buildSummary = state.buildSummary,
                     terminalLines = state.terminalLines,
                     onClearLogs = { viewModel.clearLogs() },
                     onStartBuild = { viewModel.startBuild() },
+                    onStopBuild = { viewModel.stopBuild() },
                     onResetBuild = { viewModel.resetBuild() },
                     onClearTerminal = { viewModel.clearTerminal() },
                     onExecuteCommand = { viewModel.executeTerminalCommand(it) }

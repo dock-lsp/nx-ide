@@ -104,7 +104,8 @@ enum class BottomPanelType(val label: String, val icon: String) {
  */
 enum class MainTab(val label: String, val icon: String) {
     PROJECT("项目", "📁"),
-    RECENT("最近", "📋")
+    RECENT("最近", "📋"),
+    SETTINGS("设置", "⚙️")
 }
 
 /**

@@ -24,6 +24,7 @@ fun NxTopBar(
     activeTab: MainTab,
     onTabClick: (MainTab) -> Unit,
     onSwitchClick: () -> Unit,
+    onSettingsClick: () -> Unit = {},
     onMoreClick: () -> Unit
 ) {
     TopAppBar(
