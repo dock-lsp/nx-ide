@@ -82,11 +82,12 @@ jobs:
           ### ✨ 功能特性
           - 📝 Kotlin/XML/Gradle 语法高亮代码编辑器
           - 📋 20+ 安卓项目模板
-          - 🔨 可视化构建系统
+          - 🔨 **真实 Gradle 构建系统**（自动检测 gradlew，解析任务输出）
           - 📋 Logcat 日志查看
-          - 💻 内置终端
+          - 💻 **真实终端**（基于 ProcessBuilder 的命令执行）
           - 📐 Layout Inspector
-          - 🤖 AI 助手
+          - 🤖 **AI 助手**（OpenAI 兼容 API，SSE 流式输出）
+          - ⚙️ 设置页面（支持 OpenAI/DeepSeek/通义千问/Moonshot 等）
 
           ### 📦 下载
           - **Debug 版本**: `nx-ide-debug.apk` - 开发调试版本
@@ -94,7 +95,8 @@ jobs:
 
           ### 🛠️ 技术栈
           - Kotlin + Jetpack Compose + Material3
-          - MVVM + StateFlow
+          - MVVM + StateFlow + DataStore
+          - OkHttp SSE 流式请求
           - Android 8.0+ (API 26+)
         files: |
           ./artifacts/debug/*.apk
